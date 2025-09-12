@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import useRecipeStore from '../store/recipeStore';
 
-const DeleteRecipeButton = ({ recipeId, onDeleteSuccess, showText = true }) => {
+const DeleteRecipeButton = ({ recipeId, onDeleteSuccess, showText = true, navigateAfterDelete = false }) => {
+  const navigate = useNavigate();
   const deleteRecipe = useRecipeStore(state => state.deleteRecipe);
   const recipe = useRecipeStore(state => 
     state.recipes.find(recipe => recipe.id === recipeId)
@@ -23,8 +25,11 @@ const DeleteRecipeButton = ({ recipeId, onDeleteSuccess, showText = true }) => {
     setIsDeleting(false);
     setShowConfirmation(false);
     
+    // Handle navigation - either via callback or direct navigation
     if (onDeleteSuccess) {
       onDeleteSuccess();
+    } else if (navigateAfterDelete) {
+      navigate('/');
     }
   };
 
