@@ -2,6 +2,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import RecipeList from './components/RecipeList';
 import AddRecipeForm from './components/AddRecipeForm';
 import RecipeDetails from './components/RecipeDetails';
+import SearchBar from './components/SearchBar';
+import FilterPanel from './components/FilterPanel';
 import useRecipeStore from './store/recipeStore';
 import './styles/App.css';
 
@@ -18,6 +20,12 @@ const HomePage = () => {
       <main className="app-main">
         <div className="container">
           <AddRecipeForm />
+          
+          <div className="search-and-filter-section">
+            <SearchBar />
+            <FilterPanel />
+          </div>
+          
           <RecipeList />
         </div>
       </main>
