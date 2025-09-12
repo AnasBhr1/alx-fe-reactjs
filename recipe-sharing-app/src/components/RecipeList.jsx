@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import useRecipeStore from '../store/recipeStore';
+import FavoriteButton from './FavoriteButton';
 import DeleteRecipeButton from './DeleteRecipeButton';
 
 const RecipeList = () => {
@@ -59,15 +60,32 @@ const RecipeList = () => {
               <Link to={`/recipe/${recipe.id}`} className="recipe-title-link">
                 <h3>{highlightText(recipe.title, searchTerm)}</h3>
               </Link>
-              <DeleteRecipeButton 
-                recipeId={recipe.id} 
-                showText={false}
-              />
+              <div className="recipe-actions">
+                <FavoriteButton recipeId={recipe.id} size="small" />
+                <DeleteRecipeButton 
+                  recipeId={recipe.id} 
+                  showText={false}
+                />
+              </div>
             </div>
             
             <p className="recipe-description">
               {highlightText(recipe.description, searchTerm)}
             </p>
+            
+            {/* Show recipe tags */}
+            {recipe.tags && recipe.tags.length > 0 && (
+              <div className="recipe-tags">
+                {recipe.tags.slice(0, 4).map(tag => (
+                  <span key={tag} className="recipe-tag">
+                    {highlightText(tag, searchTerm)}
+                  </span>
+                ))}
+                {recipe.tags.length > 4 && (
+                  <span className="more-tags">+{recipe.tags.length - 4}</span>
+                )}
+              </div>
+            )}
             
             {/* Show matching ingredients if search term matches */}
             {searchTerm && recipe.ingredients && (
@@ -111,6 +129,11 @@ const RecipeList = () => {
               <Link to={`/recipe/${recipe.id}`} className="view-details-btn">
                 View Details →
               </Link>
+              {recipe.difficulty && (
+                <span className={`difficulty-badge difficulty-${recipe.difficulty}`}>
+                  {recipe.difficulty}
+                </span>
+              )}
             </div>
             
             <div className="recipe-meta">

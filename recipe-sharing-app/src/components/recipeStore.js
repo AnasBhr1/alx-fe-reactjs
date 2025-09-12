@@ -11,7 +11,9 @@ const useRecipeStore = create((set, get) => ({
       instructions: ["Preheat oven to 375°F", "Mix dry ingredients", "Cream butter and sugars", "Add eggs and vanilla", "Combine wet and dry ingredients", "Fold in chocolate chips", "Drop on baking sheet", "Bake 9-11 minutes"],
       prepTime: 15,
       cookingTime: 10,
-      servings: 24
+      servings: 24,
+      tags: ["dessert", "cookies", "chocolate", "baking", "sweet"],
+      difficulty: "easy"
     },
     {
       id: 2,
@@ -21,9 +23,33 @@ const useRecipeStore = create((set, get) => ({
       instructions: ["Cook spaghetti according to package directions", "Cook pancetta until crispy", "Whisk eggs with cheese", "Toss hot pasta with egg mixture", "Add pancetta and serve"],
       prepTime: 10,
       cookingTime: 15,
-      servings: 4
+      servings: 4,
+      tags: ["pasta", "italian", "dinner", "main course", "quick"],
+      difficulty: "medium"
+    },
+    {
+      id: 3,
+      title: "Vegetarian Buddha Bowl",
+      description: "Nutritious and colorful bowl with quinoa, roasted vegetables, and tahini dressing.",
+      ingredients: ["1 cup quinoa", "2 cups mixed vegetables", "1/4 cup tahini", "2 tbsp lemon juice", "1 tbsp olive oil", "Salt and pepper"],
+      instructions: ["Cook quinoa", "Roast vegetables", "Mix tahini dressing", "Assemble bowl", "Drizzle with dressing"],
+      prepTime: 20,
+      cookingTime: 25,
+      servings: 2,
+      tags: ["healthy", "vegetarian", "bowl", "quinoa", "vegetables"],
+      difficulty: "easy"
     }
   ],
+
+  // Favorites and user interaction tracking
+  favorites: [],
+  viewedRecipes: [], // Track recipe views for recommendations
+  userPreferences: {
+    preferredTags: [], // Tags user frequently favorites
+    preferredDifficulty: null, // User's preferred difficulty level
+    preferredCookingTime: null, // User's preferred max cooking time
+    preferredServings: null // User's preferred serving size
+  },
 
   // Search and filter state
   searchTerm: '',
@@ -33,11 +59,16 @@ const useRecipeStore = create((set, get) => ({
     minServings: null,
     maxServings: null
   },
-  sortBy: 'title', // 'title', 'prepTime', 'cookingTime', 'servings', 'newest'
+  sortBy: 'title',
 
   // Actions
   addRecipe: (newRecipe) => set((state) => ({ 
-    recipes: [...state.recipes, { ...newRecipe, id: Date.now() }] 
+    recipes: [...state.recipes, { 
+      ...newRecipe, 
+      id: Date.now(),
+      tags: newRecipe.tags || [],
+      difficulty: newRecipe.difficulty || 'medium'
+    }] 
   })),
   
   setRecipes: (recipes) => set({ recipes }),
@@ -49,8 +80,71 @@ const useRecipeStore = create((set, get) => ({
   })),
   
   deleteRecipe: (id) => set((state) => ({
-    recipes: state.recipes.filter(recipe => recipe.id !== id)
+    recipes: state.recipes.filter(recipe => recipe.id !== id),
+    favorites: state.favorites.filter(fId => fId !== id)
   })),
+
+  // Favorites actions
+  addFavorite: (recipeId) => set((state) => {
+    if (state.favorites.includes(recipeId)) return state;
+    
+    const recipe = state.recipes.find(r => r.id === recipeId);
+    if (!recipe) return state;
+
+    // Update user preferences based on favorited recipe
+    const updatedPreferences = { ...state.userPreferences };
+    
+    // Add recipe tags to preferred tags
+    if (recipe.tags) {
+      recipe.tags.forEach(tag => {
+        if (!updatedPreferences.preferredTags.includes(tag)) {
+          updatedPreferences.preferredTags.push(tag);
+        }
+      });
+    }
+
+    return {
+      favorites: [...state.favorites, recipeId],
+      userPreferences: updatedPreferences
+    };
+  }),
+
+  removeFavorite: (recipeId) => set((state) => ({
+    favorites: state.favorites.filter(id => id !== recipeId)
+  })),
+
+  toggleFavorite: (recipeId) => set((state) => {
+    const isFavorited = state.favorites.includes(recipeId);
+    if (isFavorited) {
+      return { favorites: state.favorites.filter(id => id !== recipeId) };
+    } else {
+      const recipe = state.recipes.find(r => r.id === recipeId);
+      if (!recipe) return state;
+
+      // Update user preferences
+      const updatedPreferences = { ...state.userPreferences };
+      if (recipe.tags) {
+        recipe.tags.forEach(tag => {
+          if (!updatedPreferences.preferredTags.includes(tag)) {
+            updatedPreferences.preferredTags.push(tag);
+          }
+        });
+      }
+
+      return {
+        favorites: [...state.favorites, recipeId],
+        userPreferences: updatedPreferences
+      };
+    }
+  }),
+
+  // Track recipe views for better recommendations
+  addViewedRecipe: (recipeId) => set((state) => {
+    const updatedViewed = state.viewedRecipes.filter(id => id !== recipeId);
+    return {
+      viewedRecipes: [recipeId, ...updatedViewed].slice(0, 20) // Keep last 20 viewed
+    };
+  }),
 
   // Search and filter actions
   setSearchTerm: (term) => set({ searchTerm: term }),
@@ -71,6 +165,99 @@ const useRecipeStore = create((set, get) => ({
     }
   }),
 
+  // Get favorites recipes
+  getFavoriteRecipes: () => {
+    const state = get();
+    return state.favorites
+      .map(id => state.recipes.find(recipe => recipe.id === id))
+      .filter(Boolean);
+  },
+
+  // Intelligent recommendations based on user behavior
+  getRecommendations: () => {
+    const state = get();
+    const { recipes, favorites, userPreferences, viewedRecipes } = state;
+    
+    if (recipes.length === 0) return [];
+
+    let scored = recipes.map(recipe => {
+      let score = 0;
+      
+      // Don't recommend already favorited recipes
+      if (favorites.includes(recipe.id)) return null;
+
+      // Boost score for preferred tags
+      if (recipe.tags && userPreferences.preferredTags.length > 0) {
+        const matchingTags = recipe.tags.filter(tag => 
+          userPreferences.preferredTags.includes(tag)
+        ).length;
+        score += matchingTags * 10;
+      }
+
+      // Boost score for recipes with similar tags to favorites
+      const favoriteRecipes = favorites
+        .map(id => recipes.find(r => r.id === id))
+        .filter(Boolean);
+      
+      favoriteRecipes.forEach(favRecipe => {
+        if (favRecipe.tags && recipe.tags) {
+          const commonTags = favRecipe.tags.filter(tag => recipe.tags.includes(tag));
+          score += commonTags.length * 5;
+        }
+      });
+
+      // Boost score for similar difficulty
+      if (favoriteRecipes.length > 0) {
+        const preferredDifficulties = [...new Set(favoriteRecipes.map(r => r.difficulty))];
+        if (preferredDifficulties.includes(recipe.difficulty)) {
+          score += 8;
+        }
+      }
+
+      // Boost score for similar cooking time
+      if (favoriteRecipes.length > 0) {
+        const avgCookTime = favoriteRecipes
+          .filter(r => r.cookingTime)
+          .reduce((sum, r, _, arr) => sum + r.cookingTime / arr.length, 0);
+        
+        if (recipe.cookingTime) {
+          const timeDiff = Math.abs(recipe.cookingTime - avgCookTime);
+          if (timeDiff <= 10) score += 6;
+          else if (timeDiff <= 20) score += 3;
+        }
+      }
+
+      // Boost score for similar serving size
+      if (favoriteRecipes.length > 0) {
+        const avgServings = favoriteRecipes
+          .filter(r => r.servings)
+          .reduce((sum, r, _, arr) => sum + r.servings / arr.length, 0);
+        
+        if (recipe.servings) {
+          const servingsDiff = Math.abs(recipe.servings - avgServings);
+          if (servingsDiff <= 1) score += 4;
+          else if (servingsDiff <= 2) score += 2;
+        }
+      }
+
+      // Slight penalty for recently viewed recipes (avoid over-showing same recipes)
+      if (viewedRecipes.includes(recipe.id)) {
+        score -= 2;
+      }
+
+      // Add some randomness to prevent always showing same recommendations
+      score += Math.random() * 3;
+
+      return { recipe, score };
+    }).filter(Boolean);
+
+    // Sort by score and return top recommendations
+    return scored
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 6)
+      .map(item => item.recipe);
+  },
+
   // Computed filtered and sorted recipes
   getFilteredRecipes: () => {
     const state = get();
@@ -88,8 +275,11 @@ const useRecipeStore = create((set, get) => ({
         const instructionsMatch = recipe.instructions?.some(instruction => 
           instruction.toLowerCase().includes(searchLower)
         ) || false;
+        const tagsMatch = recipe.tags?.some(tag => 
+          tag.toLowerCase().includes(searchLower)
+        ) || false;
         
-        return titleMatch || descriptionMatch || ingredientsMatch || instructionsMatch;
+        return titleMatch || descriptionMatch || ingredientsMatch || instructionsMatch || tagsMatch;
       });
     }
 

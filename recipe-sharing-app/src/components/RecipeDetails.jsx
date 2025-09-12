@@ -1,17 +1,27 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import useRecipeStore from '../store/recipeStore';
 import EditRecipeForm from './EditRecipeForm';
 import DeleteRecipeButton from './DeleteRecipeButton';
+import FavoriteButton from './FavoriteButton';
 
 const RecipeDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   
+  const { addViewedRecipe } = useRecipeStore();
+  
   const recipe = useRecipeStore(state =>
     state.recipes.find(recipe => recipe.id === parseInt(id))
   );
+
+  // Track recipe view for recommendations
+  useEffect(() => {
+    if (recipe) {
+      addViewedRecipe(recipe.id);
+    }
+  }, [recipe?.id, addViewedRecipe]);
 
   if (!recipe) {
     return (
@@ -42,6 +52,11 @@ const RecipeDetails = () => {
           ← Back to Recipes
         </Link>
         <div className="recipe-actions">
+          <FavoriteButton 
+            recipeId={recipe.id} 
+            showText={true} 
+            size="large"
+          />
           <button 
             onClick={() => setIsEditing(!isEditing)}
             className={`edit-toggle-btn ${isEditing ? 'active' : ''}`}
@@ -70,6 +85,11 @@ const RecipeDetails = () => {
                 <span className="recipe-created">
                   Created: {new Date(recipe.id).toLocaleDateString()}
                 </span>
+                {recipe.difficulty && (
+                  <span className={`difficulty-badge difficulty-${recipe.difficulty}`}>
+                    {recipe.difficulty} difficulty
+                  </span>
+                )}
               </div>
             </div>
             
@@ -77,6 +97,17 @@ const RecipeDetails = () => {
               <h3>Description</h3>
               <p>{recipe.description}</p>
             </div>
+
+            {recipe.tags && recipe.tags.length > 0 && (
+              <div className="recipe-tags-section">
+                <h3>Categories</h3>
+                <div className="recipe-tags">
+                  {recipe.tags.map(tag => (
+                    <span key={tag} className="recipe-tag">{tag}</span>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {recipe.ingredients && (
               <div className="recipe-ingredients">
@@ -100,7 +131,7 @@ const RecipeDetails = () => {
               </div>
             )}
 
-            {recipe.cookingTime && (
+            {(recipe.prepTime || recipe.cookingTime || recipe.servings) && (
               <div className="recipe-timing">
                 <h3>Cooking Information</h3>
                 <div className="timing-info">
@@ -109,12 +140,19 @@ const RecipeDetails = () => {
                       <strong>Prep Time:</strong> {recipe.prepTime} minutes
                     </span>
                   )}
-                  <span className="time-item">
-                    <strong>Cooking Time:</strong> {recipe.cookingTime} minutes
-                  </span>
+                  {recipe.cookingTime && (
+                    <span className="time-item">
+                      <strong>Cooking Time:</strong> {recipe.cookingTime} minutes
+                    </span>
+                  )}
                   {recipe.servings && (
                     <span className="time-item">
                       <strong>Servings:</strong> {recipe.servings}
+                    </span>
+                  )}
+                  {recipe.prepTime && recipe.cookingTime && (
+                    <span className="time-item total-time">
+                      <strong>Total Time:</strong> {recipe.prepTime + recipe.cookingTime} minutes
                     </span>
                   )}
                 </div>
