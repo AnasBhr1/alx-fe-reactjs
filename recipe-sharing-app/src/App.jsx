@@ -1,13 +1,15 @@
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import RecipeList from './components/RecipeList';
 import AddRecipeForm from './components/AddRecipeForm';
-import useRecipeStore from './components/recipeStore';
+import RecipeDetails from './components/RecipeDetails';
+import useRecipeStore from './store/recipeStore';
 import './styles/App.css';
 
-const App = () => {
+const HomePage = () => {
   const recipes = useRecipeStore(state => state.recipes);
 
   return (
-    <div className="app">
+    <>
       <header className="app-header">
         <h1>🍳 Recipe Sharing App</h1>
         <p>Share and discover amazing recipes with the community</p>
@@ -23,7 +25,20 @@ const App = () => {
       <footer className="app-footer">
         <p>Built with React & Zustand • {recipes.length} recipes and counting!</p>
       </footer>
-    </div>
+    </>
+  );
+};
+
+const App = () => {
+  return (
+    <Router>
+      <div className="app">
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/recipe/:id" element={<RecipeDetails />} />
+        </Routes>
+      </div>
+    </Router>
   );
 };
 

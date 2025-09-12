@@ -1,12 +1,14 @@
-import useRecipeStore from './recipeStore';
+import { Link } from 'react-router-dom';
+import useRecipeStore from '../store/recipeStore';
+import DeleteRecipeButton from './DeleteRecipeButton';
 
 const RecipeList = () => {
-  const { recipes, deleteRecipe } = useRecipeStore();
+  const recipes = useRecipeStore(state => state.recipes);
 
   if (recipes.length === 0) {
     return (
       <div className="recipe-list-empty">
-        <p>No recipes yet. Add your first recipe below!</p>
+        <p>No recipes yet. Add your first recipe above!</p>
       </div>
     );
   }
@@ -18,17 +20,36 @@ const RecipeList = () => {
         {recipes.map(recipe => (
           <div key={recipe.id} className="recipe-card">
             <div className="recipe-header">
-              <h3>{recipe.title}</h3>
-              <button 
-                onClick={() => deleteRecipe(recipe.id)}
-                className="delete-btn"
-                title="Delete recipe"
-                aria-label={`Delete ${recipe.title}`}
-              >
-                ×
-              </button>
+              <Link to={`/recipe/${recipe.id}`} className="recipe-title-link">
+                <h3>{recipe.title}</h3>
+              </Link>
+              <DeleteRecipeButton 
+                recipeId={recipe.id} 
+                showText={false}
+              />
             </div>
-            <p>{recipe.description}</p>
+            <p className="recipe-description">{recipe.description}</p>
+            
+            {(recipe.prepTime || recipe.cookingTime || recipe.servings) && (
+              <div className="recipe-quick-info">
+                {recipe.prepTime && (
+                  <span className="info-item">⏱️ {recipe.prepTime}m prep</span>
+                )}
+                {recipe.cookingTime && (
+                  <span className="info-item">🔥 {recipe.cookingTime}m cook</span>
+                )}
+                {recipe.servings && (
+                  <span className="info-item">👥 {recipe.servings} servings</span>
+                )}
+              </div>
+            )}
+
+            <div className="recipe-card-actions">
+              <Link to={`/recipe/${recipe.id}`} className="view-details-btn">
+                View Details →
+              </Link>
+            </div>
+            
             <div className="recipe-meta">
               <small>Recipe ID: {recipe.id}</small>
             </div>
