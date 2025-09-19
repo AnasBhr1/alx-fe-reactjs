@@ -18,7 +18,7 @@ githubApi.interceptors.request.use((config) => {
   return config;
 });
 
-// Function to fetch user data by username
+// Function to fetch user data by username (original functionality)
 export const fetchUserData = async (username) => {
   try {
     const response = await githubApi.get(`/users/${username}`);
@@ -31,4 +31,96 @@ export const fetchUserData = async (username) => {
   }
 };
 
-export default { fetchUserData };
+// Advanced search function with multiple criteria
+export const searchUsers = async (searchParams, page = 1, perPage = 30) => {
+  try {
+    const { username, location, minRepos, maxRepos, language, followers } = searchParams;
+    
+    // Build query string for GitHub Search API
+    let queryParts = [];
+    
+    // Add username/keyword search
+    if (username && username.trim()) {
+      queryParts.push(username.trim());
+    }
+    
+    // Add location filter
+    if (location && location.trim()) {
+      queryParts.push(`location:${location.trim()}`);
+    }
+    
+    // Add repository count filters
+    if (minRepos && minRepos > 0) {
+      if (maxRepos && maxRepos >= minRepos) {
+        queryParts.push(`repos:${minRepos}..${maxRepos}`);
+      } else {
+        queryParts.push(`repos:>=${minRepos}`);
+      }
+    } else if (maxRepos && maxRepos > 0) {
+      queryParts.push(`repos:<=${maxRepos}`);
+    }
+    
+    // Add language filter
+    if (language && language.trim()) {
+      queryParts.push(`language:${language.trim()}`);
+    }
+    
+    // Add followers filter
+    if (followers && followers > 0) {
+      queryParts.push(`followers:>=${followers}`);
+    }
+    
+    // If no search criteria provided, search for all users
+    if (queryParts.length === 0) {
+      queryParts.push('type:user');
+    }
+    
+    const query = queryParts.join(' ');
+    
+    const response = await githubApi.get('/search/users', {
+      params: {
+        q: query,
+        page,
+        per_page: perPage,
+        sort: 'repositories', // Sort by repository count
+        order: 'desc'
+      },
+    });
+    
+    return {
+      users: response.data.items || [],
+      totalCount: response.data.total_count || 0,
+      hasMore: response.data.items && response.data.items.length === perPage
+    };
+  } catch (error) {
+    if (error.response?.status === 422) {
+      throw new Error('Invalid search criteria. Please check your input.');
+    }
+    throw new Error(`Failed to search users: ${error.message}`);
+  }
+};
+
+// Get detailed user information (for when user clicks on a result)
+export const getUserDetails = async (username) => {
+  try {
+    const [userResponse, reposResponse] = await Promise.all([
+      githubApi.get(`/users/${username}`),
+      githubApi.get(`/users/${username}/repos`, {
+        params: { sort: 'updated', per_page: 5 }
+      })
+    ]);
+    
+    return {
+      user: userResponse.data,
+      repositories: reposResponse.data
+    };
+  } catch (error) {
+    throw new Error(`Failed to get user details: ${error.message}`);
+  }
+};
+
+export default { 
+  fetchUserData, 
+  searchUsers, 
+  getUserDetails 
+};
