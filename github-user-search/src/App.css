@@ -1,0 +1,112 @@
+/* Global Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+  line-height: 1.6;
+  color: #24292f;
+  background-color: #ffffff;
+}
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  width: 100%;
+}
+
+/* Header Styles */
+.app-header {
+  background: linear-gradient(135deg, #0969da 0%, #0860ca 100%);
+  color: white;
+  padding: 2rem 0;
+  text-align: center;
+}
+
+.app-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.app-description {
+  font-size: 1.125rem;
+  margin: 0;
+  opacity: 0.9;
+}
+
+/* Main Content */
+.app-main {
+  flex: 1;
+  padding: 2rem 0;
+  background-color: #f6f8fa;
+  min-height: calc(100vh - 200px);
+}
+
+/* Footer Styles */
+.app-footer {
+  background-color: #24292f;
+  color: white;
+  padding: 1rem 0;
+  text-align: center;
+  margin-top: auto;
+}
+
+.app-footer p {
+  margin: 0;
+  font-size: 0.875rem;
+  opacity: 0.8;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .app-title {
+    font-size: 2rem;
+  }
+  
+  .app-description {
+    font-size: 1rem;
+  }
+  
+  .app-header {
+    padding: 1.5rem 0;
+  }
+  
+  .app-main {
+    padding: 1.5rem 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-title {
+    font-size: 1.75rem;
+  }
+  
+  .container {
+    padding: 0 0.75rem;
+  }
+}
+
+/* Focus and Accessibility */
+button:focus-visible,
+input:focus-visible,
+a:focus-visible {
+  outline: 2px solid #0969da;
+  outline-offset: 2px;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}

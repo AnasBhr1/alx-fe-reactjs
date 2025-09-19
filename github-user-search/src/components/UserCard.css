@@ -1,0 +1,167 @@
+.user-card {
+  display: flex;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: #fff;
+  border: 1px solid #e1e5e9;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.user-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.user-avatar {
+  flex-shrink: 0;
+}
+
+.user-avatar img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 2px solid #e1e5e9;
+}
+
+.user-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.user-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.user-name {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #24292f;
+}
+
+.user-login {
+  color: #656d76;
+  font-size: 0.875rem;
+}
+
+.user-type {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 12px;
+  text-transform: uppercase;
+}
+
+.user-type.user {
+  background-color: #ddf4ff;
+  color: #0969da;
+}
+
+.user-type.organization {
+  background-color: #fff8dc;
+  color: #bf8700;
+}
+
+.user-bio {
+  margin: 0.5rem 0;
+  color: #656d76;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0.75rem 0;
+}
+
+.user-detail {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #656d76;
+}
+
+.detail-icon {
+  width: 16px;
+  text-align: center;
+}
+
+.user-stats {
+  display: flex;
+  gap: 1.5rem;
+  margin: 1rem 0;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.stat-number {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #24292f;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: #656d76;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.user-actions {
+  margin-top: 1rem;
+}
+
+.view-profile-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #24292f;
+  background-color: #f6f8fa;
+  border: 1px solid #d1d9e0;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.view-profile-btn:hover {
+  background-color: #f3f4f6;
+  border-color: #c7d2da;
+}
+
+@media (max-width: 768px) {
+  .user-card {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .user-avatar {
+    align-self: center;
+  }
+  
+  .user-header {
+    justify-content: center;
+  }
+  
+  .user-stats {
+    justify-content: center;
+  }
+  
+  .user-details {
+    align-items: center;
+  }
+}
