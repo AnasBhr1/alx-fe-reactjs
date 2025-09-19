@@ -18,53 +18,17 @@ githubApi.interceptors.request.use((config) => {
   return config;
 });
 
-// GitHub service functions
-export const githubService = {
-  // Search for users
-  searchUsers: async (query, page = 1, perPage = 30) => {
-    try {
-      const response = await githubApi.get('/search/users', {
-        params: {
-          q: query,
-          page,
-          per_page: perPage,
-        },
-      });
-      return response.data;
-    } catch (error) {
-      throw new Error(`Failed to search users: ${error.message}`);
+// Function to fetch user data by username
+export const fetchUserData = async (username) => {
+  try {
+    const response = await githubApi.get(`/users/${username}`);
+    return response.data;
+  } catch (error) {
+    if (error.response?.status === 404) {
+      throw new Error('User not found');
     }
-  },
-
-  // Get user details
-  getUserDetails: async (username) => {
-    try {
-      const response = await githubApi.get(`/users/${username}`);
-      return response.data;
-    } catch (error) {
-      if (error.response?.status === 404) {
-        throw new Error('User not found');
-      }
-      throw new Error(`Failed to get user details: ${error.message}`);
-    }
-  },
-
-  // Get user repositories
-  getUserRepos: async (username, page = 1, perPage = 30) => {
-    try {
-      const response = await githubApi.get(`/users/${username}/repos`, {
-        params: {
-          page,
-          per_page: perPage,
-          sort: 'updated',
-          direction: 'desc',
-        },
-      });
-      return response.data;
-    } catch (error) {
-      throw new Error(`Failed to get user repositories: ${error.message}`);
-    }
-  },
+    throw new Error(`Failed to fetch user data: ${error.message}`);
+  }
 };
 
-export default githubService;
+export default { fetchUserData };
