@@ -50,10 +50,16 @@ const Search = () => {
     try {
       const result = await searchUsers(formData, page, 20);
       
+      // Ensure all users have html_url property for proper profile links
+      const usersWithUrls = result.users.map(user => ({
+        ...user,
+        html_url: user.html_url || `https://github.com/${user.login}`
+      }));
+      
       if (append) {
-        setUsers(prev => [...prev, ...result.users]);
+        setUsers(prev => [...prev, ...usersWithUrls]);
       } else {
-        setUsers(result.users);
+        setUsers(usersWithUrls);
       }
       
       setTotalCount(result.totalCount);
@@ -87,7 +93,12 @@ const Search = () => {
     
     try {
       const userData = await fetchUserData(formData.username.trim());
-      setUsers([userData]);
+      // Ensure html_url is present for UserCard component
+      const userWithUrl = {
+        ...userData,
+        html_url: userData.html_url || `https://github.com/${userData.login}`
+      };
+      setUsers([userWithUrl]);
       setTotalCount(1);
       setHasMore(false);
     } catch (err) {
@@ -314,7 +325,13 @@ const Search = () => {
         {users.length > 0 && !loading && (
           <div className="grid gap-4">
             {users.map((user) => (
-              <UserCard key={user.id} user={user} />
+              <UserCard 
+                key={user.id} 
+                user={{
+                  ...user,
+                  html_url: user.html_url || `https://github.com/${user.login}`
+                }} 
+              />
             ))}
           </div>
         )}
