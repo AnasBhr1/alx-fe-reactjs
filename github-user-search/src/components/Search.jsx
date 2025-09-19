@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { searchUsers, fetchUserData } from '../services/githubService';
 import UserCard from './UserCard';
 
@@ -21,7 +21,48 @@ const Search = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [searchHistory, setSearchHistory] = useState([]);
   
+  // Load search history from localStorage on component mount
+  useEffect(() => {
+    try {
+      const history = JSON.parse(localStorage.getItem('github-search-history') || '[]');
+      setSearchHistory(history.slice(0, 5)); // Keep only last 5 searches
+    } catch (error) {
+      // Ignore localStorage errors
+    }
+  }, []);
+  
+  // Save search to history
+  const saveSearchToHistory = useCallback((searchTerm) => {
+    if (!searchTerm.trim()) return;
+    
+    try {
+      const newHistory = [
+        searchTerm,
+        ...searchHistory.filter(item => item !== searchTerm)
+      ].slice(0, 5);
+      
+      setSearchHistory(newHistory);
+      localStorage.setItem('github-search-history', JSON.stringify(newHistory));
+    } catch (error) {
+      // Ignore localStorage errors
+    }
+  }, [searchHistory]);
+  
+  // Debounce function for search input
+  const debounce = useCallback((func, wait) => {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  }, []);
+
   // Handle input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -34,11 +75,20 @@ const Search = () => {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (formData.username.trim()) {
+      saveSearchToHistory(formData.username.trim());
+    }
     await performSearch(1, false);
   };
 
   // Perform search with pagination support
   const performSearch = async (page = 1, append = false) => {
+    // Validate input
+    if (!formData.username && !formData.location && !formData.language && !formData.minRepos && !formData.followers) {
+      setError('Please enter at least one search criteria');
+      return;
+    }
+    
     setLoading(true);
     setError('');
     
@@ -93,6 +143,8 @@ const Search = () => {
     
     try {
       const userData = await fetchUserData(formData.username.trim());
+      saveSearchToHistory(formData.username.trim());
+      
       // Ensure html_url is present for UserCard component
       const userWithUrl = {
         ...userData,
@@ -125,6 +177,11 @@ const Search = () => {
     setError('');
   };
 
+  // Use search from history
+  const handleHistorySearch = (searchTerm) => {
+    setFormData(prev => ({ ...prev, username: searchTerm }));
+  };
+
   return (
     <div className="max-w-4xl mx-auto p-6">
       {/* Search Form */}
@@ -145,6 +202,7 @@ const Search = () => {
                 placeholder="Enter username or keyword..."
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 disabled={loading}
+                autoComplete="off"
               />
             </div>
             <div className="flex gap-2 sm:items-end">
@@ -152,6 +210,7 @@ const Search = () => {
                 type="submit"
                 disabled={loading}
                 className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                aria-label="Search users"
               >
                 {loading ? 'Searching...' : 'Search'}
               </button>
@@ -160,11 +219,29 @@ const Search = () => {
                 onClick={handleQuickSearch}
                 disabled={loading || !formData.username.trim()}
                 className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                aria-label="Quick search single user"
               >
                 Quick
               </button>
             </div>
           </div>
+
+          {/* Search History */}
+          {searchHistory.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              <span className="text-sm text-gray-600 font-medium">Recent searches:</span>
+              {searchHistory.map((term, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  onClick={() => handleHistorySearch(term)}
+                  className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition-colors"
+                >
+                  {term}
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* Advanced Search Toggle */}
           <div className="flex justify-between items-center">
@@ -172,6 +249,7 @@ const Search = () => {
               type="button"
               onClick={() => setShowAdvanced(!showAdvanced)}
               className="text-blue-600 hover:text-blue-800 font-medium focus:outline-none focus:underline"
+              aria-expanded={showAdvanced}
             >
               {showAdvanced ? 'Hide Advanced Filters' : 'Show Advanced Filters'}
             </button>
@@ -342,6 +420,7 @@ const Search = () => {
             <button
               onClick={handleLoadMore}
               className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+              aria-label="Load more users"
             >
               Load More Users
             </button>

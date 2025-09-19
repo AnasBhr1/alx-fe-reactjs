@@ -18,6 +18,25 @@ githubApi.interceptors.request.use((config) => {
   return config;
 });
 
+// Add response interceptor for better error handling
+githubApi.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Handle rate limiting
+    if (error.response?.status === 403 && error.response?.headers['x-ratelimit-remaining'] === '0') {
+      const resetTime = new Date(parseInt(error.response.headers['x-ratelimit-reset']) * 1000);
+      throw new Error(`Rate limit exceeded. Resets at ${resetTime.toLocaleTimeString()}`);
+    }
+    
+    // Handle API errors gracefully
+    if (error.response?.status >= 500) {
+      throw new Error('GitHub API is currently unavailable. Please try again later.');
+    }
+    
+    return Promise.reject(error);
+  }
+);
+
 // Function to fetch user data by username (original functionality)
 export const fetchUserData = async (username) => {
   try {
@@ -47,7 +66,7 @@ export const searchUsers = async (searchParams, page = 1, perPage = 30) => {
     
     // Add location filter
     if (location && location.trim()) {
-      queryParts.push(`location:${location.trim()}`);
+      queryParts.push(`location:"${location.trim()}"`);
     }
     
     // Add repository count filters
@@ -63,7 +82,7 @@ export const searchUsers = async (searchParams, page = 1, perPage = 30) => {
     
     // Add language filter
     if (language && language.trim()) {
-      queryParts.push(`language:${language.trim()}`);
+      queryParts.push(`language:"${language.trim()}"`);
     }
     
     // Add followers filter
@@ -78,30 +97,29 @@ export const searchUsers = async (searchParams, page = 1, perPage = 30) => {
     
     const query = queryParts.join(' ');
     
-    // Make request to GitHub Search Users API: https://api.github.com/search/users?q={query}
-    const searchUsersUrl = 'https://api.github.com/search/users?q=' + encodeURIComponent(query);
-    console.log('Searching users with URL:', searchUsersUrl);
-    
     const response = await githubApi.get('/search/users', {
       params: {
         q: query,
         page,
-        per_page: perPage,
-        sort: 'repositories', // Sort by repository count
+        per_page: Math.min(perPage, 100), // GitHub API limits to 100 per page
+        sort: 'repositories',
         order: 'desc'
       },
     });
     
     return {
       users: response.data.items || [],
-      totalCount: response.data.total_count || 0,
-      hasMore: response.data.items && response.data.items.length === perPage
+      totalCount: Math.min(response.data.total_count || 0, 1000), // GitHub limits to 1000 results
+      hasMore: response.data.items && response.data.items.length === perPage && page < 34 // Max 34 pages (1000/30)
     };
   } catch (error) {
     if (error.response?.status === 422) {
       throw new Error('Invalid search criteria. Please check your input.');
     }
-    throw new Error(`Failed to search users: ${error.message}`);
+    if (error.response?.status === 403) {
+      throw new Error('Search rate limit exceeded. Please try again in a few minutes.');
+    }
+    throw new Error(`Search failed: ${error.message}`);
   }
 };
 
@@ -111,7 +129,11 @@ export const getUserDetails = async (username) => {
     const [userResponse, reposResponse] = await Promise.all([
       githubApi.get(`/users/${username}`),
       githubApi.get(`/users/${username}/repos`, {
-        params: { sort: 'updated', per_page: 5 }
+        params: { 
+          sort: 'updated', 
+          per_page: 5,
+          type: 'owner'
+        }
       })
     ]);
     
