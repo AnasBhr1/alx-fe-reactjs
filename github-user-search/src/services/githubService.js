@@ -32,6 +32,7 @@ export const fetchUserData = async (username) => {
 };
 
 // Advanced search function with multiple criteria
+// GitHub Search Users API endpoint: https://api.github.com/search/users?q={query}
 export const searchUsers = async (searchParams, page = 1, perPage = 30) => {
   try {
     const { username, location, minRepos, maxRepos, language, followers } = searchParams;
@@ -76,6 +77,10 @@ export const searchUsers = async (searchParams, page = 1, perPage = 30) => {
     }
     
     const query = queryParts.join(' ');
+    
+    // Make request to GitHub Search Users API: https://api.github.com/search/users?q={query}
+    const searchUsersUrl = 'https://api.github.com/search/users?q=' + encodeURIComponent(query);
+    console.log('Searching users with URL:', searchUsersUrl);
     
     const response = await githubApi.get('/search/users', {
       params: {
