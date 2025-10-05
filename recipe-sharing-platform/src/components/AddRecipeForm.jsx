@@ -13,7 +13,8 @@ function AddRecipeForm() {
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const name = e.target.name;
+    const value = e.target.value;
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -28,7 +29,7 @@ function AddRecipeForm() {
   };
 
   const handleBlur = (e) => {
-    const { name } = e.target;
+    const name = e.target.name;
     setTouched(prev => ({
       ...prev,
       [name]: true
