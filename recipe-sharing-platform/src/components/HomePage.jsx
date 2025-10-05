@@ -55,12 +55,25 @@ function HomePage() {
       {/* Header Section */}
       <header className="bg-white shadow-md">
         <div className="container mx-auto px-4 py-6">
-          <h1 className="text-4xl font-bold text-gray-800">
-            Recipe Sharing Platform
-          </h1>
-          <p className="text-gray-600 mt-2">
-            Discover and share amazing recipes from around the world
-          </p>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h1 className="text-4xl font-bold text-gray-800">
+                Recipe Sharing Platform
+              </h1>
+              <p className="text-gray-600 mt-2">
+                Discover and share amazing recipes from around the world
+              </p>
+            </div>
+            <Link
+              to="/add-recipe"
+              className="mt-4 sm:mt-0 inline-flex items-center bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded-lg transition-all duration-300 hover:shadow-lg"
+            >
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Add Recipe
+            </Link>
+          </div>
         </div>
       </header>
 
