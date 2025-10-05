@@ -12,7 +12,6 @@ function AddRecipeForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
-  // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -20,7 +19,6 @@ function AddRecipeForm() {
       [name]: value
     }));
 
-    // Clear error for this field when user starts typing
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -29,7 +27,6 @@ function AddRecipeForm() {
     }
   };
 
-  // Handle field blur (when user leaves a field)
   const handleBlur = (e) => {
     const { name } = e.target;
     setTouched(prev => ({
@@ -39,7 +36,6 @@ function AddRecipeForm() {
     validateField(name, formData[name]);
   };
 
-  // Validate individual field
   const validateField = (fieldName, value) => {
     let error = '';
 
@@ -56,7 +52,6 @@ function AddRecipeForm() {
         if (!value.trim()) {
           error = 'Ingredients are required';
         } else {
-          // Check if there are at least 2 ingredients (separated by newlines or commas)
           const ingredientsList = value.split(/[\n,]/).filter(item => item.trim());
           if (ingredientsList.length < 2) {
             error = 'Please add at least 2 ingredients';
@@ -84,12 +79,10 @@ function AddRecipeForm() {
     return error === '';
   };
 
-  // Validate entire form
   const validateForm = () => {
     const newErrors = {};
     let isValid = true;
 
-    // Validate title
     if (!formData.title.trim()) {
       newErrors.title = 'Recipe title is required';
       isValid = false;
@@ -98,7 +91,6 @@ function AddRecipeForm() {
       isValid = false;
     }
 
-    // Validate ingredients
     if (!formData.ingredients.trim()) {
       newErrors.ingredients = 'Ingredients are required';
       isValid = false;
@@ -110,7 +102,6 @@ function AddRecipeForm() {
       }
     }
 
-    // Validate steps
     if (!formData.steps.trim()) {
       newErrors.steps = 'Preparation steps are required';
       isValid = false;
@@ -123,30 +114,23 @@ function AddRecipeForm() {
     return isValid;
   };
 
-  // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // Mark all fields as touched
     setTouched({
       title: true,
       ingredients: true,
       steps: true
     });
 
-    // Validate form
     if (validateForm()) {
       setIsSubmitting(true);
 
-      // Simulate API call
       setTimeout(() => {
         console.log('Recipe submitted:', formData);
-        
-        // Show success message
         setSubmitSuccess(true);
         setIsSubmitting(false);
 
-        // Reset form after 2 seconds
         setTimeout(() => {
           setFormData({
             title: '',
@@ -164,7 +148,6 @@ function AddRecipeForm() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
-        {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-2">
             Add New Recipe
@@ -174,10 +157,8 @@ function AddRecipeForm() {
           </p>
         </div>
 
-        {/* Form Card */}
         <div className="bg-white rounded-lg shadow-lg p-8">
           <form onSubmit={handleSubmit} noValidate>
-            {/* Recipe Title */}
             <div className="mb-6">
               <label 
                 htmlFor="title" 
@@ -210,7 +191,6 @@ function AddRecipeForm() {
               )}
             </div>
 
-            {/* Ingredients */}
             <div className="mb-6">
               <label 
                 htmlFor="ingredients" 
@@ -231,7 +211,7 @@ function AddRecipeForm() {
                     ? 'border-red-500 focus:ring-red-500'
                     : 'border-gray-300 focus:ring-blue-500'
                 }`}
-                placeholder="Enter each ingredient on a new line:&#10;2 cups flour&#10;1 cup sugar&#10;3 eggs&#10;1 tsp vanilla extract"
+                placeholder="Enter each ingredient on a new line"
               />
               <p className="mt-2 text-sm text-gray-500">
                 Add each ingredient on a new line (minimum 2 ingredients)
@@ -246,7 +226,6 @@ function AddRecipeForm() {
               )}
             </div>
 
-            {/* Preparation Steps */}
             <div className="mb-6">
               <label 
                 htmlFor="steps" 
@@ -267,7 +246,7 @@ function AddRecipeForm() {
                     ? 'border-red-500 focus:ring-red-500'
                     : 'border-gray-300 focus:ring-blue-500'
                 }`}
-                placeholder="Describe the preparation steps in detail:&#10;1. Preheat oven to 350°F&#10;2. Mix dry ingredients in a bowl&#10;3. Add wet ingredients and stir until combined&#10;4. Pour into greased pan and bake for 25 minutes"
+                placeholder="Describe the preparation steps in detail"
               />
               <p className="mt-2 text-sm text-gray-500">
                 Provide detailed step-by-step instructions
@@ -282,7 +261,6 @@ function AddRecipeForm() {
               )}
             </div>
 
-            {/* Success Message */}
             {submitSuccess && (
               <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-4 flex items-center">
                 <svg className="w-6 h-6 text-green-600 mr-3" fill="currentColor" viewBox="0 0 20 20">
@@ -295,7 +273,6 @@ function AddRecipeForm() {
               </div>
             )}
 
-            {/* Submit Button */}
             <div className="flex flex-col sm:flex-row gap-4">
               <button
                 type="submit"
@@ -337,7 +314,6 @@ function AddRecipeForm() {
           </form>
         </div>
 
-        {/* Helper Card */}
         <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
           <h3 className="text-lg font-semibold text-blue-900 mb-3 flex items-center">
             <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
