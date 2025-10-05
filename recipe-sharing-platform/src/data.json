@@ -1,0 +1,56 @@
+[
+  {
+    "id": 1,
+    "title": "Spaghetti Carbonara",
+    "summary": "A classic Italian pasta dish with eggs, cheese, bacon, and black pepper.",
+    "image": "https://via.placeholder.com/300x200/4299e1/ffffff?text=Spaghetti+Carbonara"
+  },
+  {
+    "id": 2,
+    "title": "Chicken Tikka Masala",
+    "summary": "Chunks of grilled chicken (tikka) cooked in a smooth buttery & creamy tomato based gravy.",
+    "image": "https://via.placeholder.com/300x200/f56565/ffffff?text=Chicken+Tikka"
+  },
+  {
+    "id": 3,
+    "title": "Caesar Salad",
+    "summary": "A green salad of romaine lettuce and croutons dressed with lemon juice, olive oil, egg, and parmesan cheese.",
+    "image": "https://via.placeholder.com/300x200/48bb78/ffffff?text=Caesar+Salad"
+  },
+  {
+    "id": 4,
+    "title": "Beef Tacos",
+    "summary": "Seasoned ground beef served in crispy taco shells with fresh toppings and zesty salsa.",
+    "image": "https://via.placeholder.com/300x200/ed8936/ffffff?text=Beef+Tacos"
+  },
+  {
+    "id": 5,
+    "title": "Margherita Pizza",
+    "summary": "Traditional Italian pizza topped with tomato sauce, mozzarella cheese, and fresh basil leaves.",
+    "image": "https://via.placeholder.com/300x200/9f7aea/ffffff?text=Margherita+Pizza"
+  },
+  {
+    "id": 6,
+    "title": "Chocolate Chip Cookies",
+    "summary": "Soft and chewy cookies loaded with chocolate chips, perfect for any sweet tooth.",
+    "image": "https://via.placeholder.com/300x200/d69e2e/ffffff?text=Cookies"
+  },
+  {
+    "id": 7,
+    "title": "Greek Moussaka",
+    "summary": "Layered eggplant and meat sauce casserole topped with creamy béchamel sauce.",
+    "image": "https://via.placeholder.com/300x200/805ad5/ffffff?text=Moussaka"
+  },
+  {
+    "id": 8,
+    "title": "Thai Green Curry",
+    "summary": "Aromatic curry with coconut milk, vegetables, and your choice of protein in a fragrant green sauce.",
+    "image": "https://via.placeholder.com/300x200/38b2ac/ffffff?text=Green+Curry"
+  },
+  {
+    "id": 9,
+    "title": "French Onion Soup",
+    "summary": "Rich beef broth with caramelized onions, topped with crusty bread and melted Gruyère cheese.",
+    "image": "https://via.placeholder.com/300x200/e53e3e/ffffff?text=Onion+Soup"
+  }
+]
